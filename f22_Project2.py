@@ -29,9 +29,10 @@ def get_listings_from_search_results(html_file):
     
     # class = class="t1jojoys dir dir-ltr"
     # _tyxjp1
-    source_path = os.path.dirname(__file__)
-    full_path = os.path.join(source_path, html_file)
-    with open(full_path) as fh:
+    # source_path = os.path.dirname(__file__)
+    # full_path = os.path.join(source_path, html_file)
+    # with open(full_path) as fh:
+    with open(html_file, encoding="utf-8") as fh:
         soup = BeautifulSoup(fh, 'html.parser')
         prices = soup.find_all('span', class_ = "_tyxjp1")
         titles= soup.find_all('div', class_ = "t1jojoys dir dir-ltr")
@@ -148,7 +149,21 @@ def get_detailed_listing_database(html_file):
         ...
     ]
     """
-    pass
+    allTups = get_listings_from_search_results(html_file)
+    with open(html_file, encoding="utf-8") as fh:
+        soup = BeautifulSoup(fh, 'html.parser')
+        titles= soup.find_all('div', class_ = "t1jojoys dir dir-ltr")
+        
+        OutTupleList= []
+        for i in range(len(titles)):
+            title = titles[i].get_text()
+            lstNum = titles[i].get('id', None)
+            lstNum = lstNum.strip("title_")
+            listingInfo = get_listing_information(lstNum)
+            tuppy = allTups[i] + listingInfo
+            OutTupleList.append(tuppy)
+        return OutTupleList            
+    
 
 
 def write_csv(data, filename):
@@ -270,14 +285,16 @@ class TestCases(unittest.TestCase):
             # assert each item in the list of listings is a tuple
             self.assertEqual(type(item), tuple)
             # check that each tuple has a length of 6
-
+            self.assertEqual(len(item), 6)
         # check that the first tuple is made up of the following:
         # 'Loft in Mission District', 210, '1944564', '2022-004088STR', 'Entire Room', 1
-
+        self.assertEqual(detailed_database[0], ('Loft in Mission District', 
+        210, '1944564', '2022-004088STR', 'Entire Room', 1))
         # check that the last tuple is made up of the following:
         # 'Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1
-
-        pass
+        self.assertEqual(detailed_database[19], ('Guest suite in Mission District', 
+        238, '32871760', 'STR-0004707', 'Entire Room', 1))
+        
 
     def test_write_csv(self):
         # call get_detailed_listing_database on "html_files/mission_district_search_results.html"
