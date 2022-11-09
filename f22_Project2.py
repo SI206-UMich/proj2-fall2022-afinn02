@@ -79,20 +79,56 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
+    #li class="f19phm7j dir dir-ltr
     #we are returning one tuple at a time
-    # source_path = os.path.dirname(__file__)
-    # full_path = os.path.join(source_path, html_file)
-    html_path = "html_files/listing_" + listing_id + ".html"
-    source_path = os.path.dirname(__file__)
-    full_path = os.path.join(source_path, html_path)
+    path = "html_files/listing_"+listing_id + ".html"
+    with open(path, encoding="utf-8") as fh:
+        data = fh.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        
+        #get policy
+        policies = soup.find('li', class_ = "f19phm7j dir dir-ltr")
+        policies = policies.find('span').text
+        if "pending" in policies.lower():
+            policy = "Pending"
+        elif "exempt" in policies.lower():
+            policy = "Exempt"
+        else:
+            policy = policies
 
-    with open(full_path) as fh:
-        soup = BeautifulSoup(fh, 'html.parser')
-        subtitles = soup.find_all('div', class_ = "_1jlr81g")
-        rooms = soup.find_all('h1', class_ = "_fecoyn4")
-        policies = soup.find_all('span', class_ = "ll4r2nl dir dir-ltr")
+        #get place type
+        room = soup.find('h2', class_ = "_14i3z6h")
+        room = room.text
+        if "private" in room.lower():
+            roomType = "Private Room"
+        elif "shared" in room.lower():
+            roomType = "Shared Room"
+        else:
+            roomType = "Entire Room"
+        
+        #get number rooms
+        numRooms = soup.find('div', class_ = "_tqmy57")
+        numRooms = numRooms.find_all('li', class_ = "l7n4lsf dir dir-ltr")
+        #numRooms = numRooms.find('span', class_ = "s1b4clln dir dir-ltr")
+        roomH = numRooms[1].find_all('span')
+        roomH = roomH[2].text
+        if "studio" in roomH.lower():
+            beds = 1
+        else:
+            roomH = roomH.split()
+            beds = int(roomH[0])
+        
+        outInfo = (policy, roomType, beds)
+        return outInfo
+        
 
         
+
+        
+        
+
+
+
 
 
         
@@ -217,12 +253,12 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple is an int
             self.assertEqual(type(listing_information[2]), int)
         # check that the first listing in the html_list has policy number 'STR-0001541'
-
+        self.assertEqual(listing_informations[0][0], "STR-0001541")
         # check that the last listing in the html_list is a "Private Room"
-
+        self.assertEqual(listing_informations[4][1], "Private Room")
         # check that the third listing has one bedroom
-
-        pass
+        self.assertEqual(listing_informations[2][2], 1)
+        
 
     def test_get_detailed_listing_database(self):
         # call get_detailed_listing_database on "html_files/mission_district_search_results.html"
