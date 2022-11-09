@@ -92,10 +92,11 @@ def get_listing_information(listing_id):
         policies = policies.find('span').text
         if "pending" in policies.lower():
             policy = "Pending"
-        elif "exempt" in policies.lower():
+        elif "exempt" in policies.lower() or "not needed" in policies.lower():
             policy = "Exempt"
         else:
             policy = policies
+        
 
         #get place type
         room = soup.find('h2', class_ = "_14i3z6h")
@@ -195,7 +196,7 @@ def write_csv(data, filename):
         #writing first row
         header = ["Listing Title", "Cost", "Listing ID", "Policy Number", "Place Type", "Number of Bedrooms"]
         writer.writerow(header)
-        sort = sorted(data, key = lambda x: x[2])
+        sort = sorted(data, key = lambda x: int(x[1]))
    
         for item in sort:
             writer.writerow(item)
@@ -220,7 +221,17 @@ def check_policy_numbers(data):
     ]
 
     """
-    pass
+    policy_nums = []
+    pattern = r'(20[0-9]{2}-00[0-9]{4}STR)|(STR-000[0-9]{4})'
+    for tup in data:
+        policy = tup[3]
+        if "pending" not in policy.lower() and "exempt" not in policy.lower():
+            if re.findall(pattern, policy):
+                continue
+            else:
+                policy_nums.append(tup[2])
+                print(tup)
+    return policy_nums
 
 
 def extra_credit(listing_id):
@@ -283,6 +294,10 @@ class TestCases(unittest.TestCase):
         self.assertEqual(listing_informations[4][1], "Private Room")
         # check that the third listing has one bedroom
         self.assertEqual(listing_informations[2][2], 1)
+
+        extraNum = "41545776"
+        lstInfo = get_listing_information(extraNum)
+
         
 
     def test_get_detailed_listing_database(self):
@@ -338,11 +353,11 @@ class TestCases(unittest.TestCase):
         # check that the return value is a list
         self.assertEqual(type(invalid_listings), list)
         # check that there is exactly one element in the string
-
+        self.assertEqual(len(invalid_listings), 1)
         # check that the element in the list is a string
-
+        self.assertEqual(type(invalid_listings[0]), str)
         # check that the first element in the list is '16204265'
-        pass
+        self.assertEqual(invalid_listings[0], "16204265")
 
 
 if __name__ == '__main__':
