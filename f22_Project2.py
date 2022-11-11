@@ -1,3 +1,6 @@
+# NAME: Abigail Finn
+# UNIQNAME: affinn
+# PEOPLE I WORKED WITH: Kiran Krishnan (kirandk), Jake Hays (jakehays)
 from xml.sax import parseString
 from bs4 import BeautifulSoup
 import re
@@ -30,8 +33,8 @@ def get_listings_from_search_results(html_file):
     # class = class="t1jojoys dir dir-ltr"
     # _tyxjp1
     # source_path = os.path.dirname(__file__)
-    # full_path = os.path.join(source_path, html_file)
-    # with open(full_path) as fh:
+    # full_path = opath.join(source_path, html_file)
+    # with open(full_path) as fh:s.
     with open(html_file, encoding="utf-8") as fh:
         soup = BeautifulSoup(fh, 'html.parser')
         prices = soup.find_all('span', class_ = "_tyxjp1")
@@ -262,7 +265,9 @@ class TestCases(unittest.TestCase):
         # check that the variable you saved after calling the function is a list
         self.assertEqual(type(listings), list)
         # check that each item in the list is a tuple
-        self.assertEqual(type(listings[0]), tuple)
+        #self.assertEqual(type(listings[0]), tuple)
+        for i in range(20):
+            self.assertEqual(type(listings[i]), tuple)
         # check that the first title, cost, and listing id tuple is correct (open the search results html and find it)
         self.assertEqual(listings[0], ("Loft in Mission District", 210, "1944564"))
         # check that the last title is correct (open the search results html and find it)
@@ -297,6 +302,8 @@ class TestCases(unittest.TestCase):
 
         extraNum = "41545776"
         lstInfo = get_listing_information(extraNum)
+        #we were running into an error with this in the check policy number.
+        # ..I modified the second function but I am not sure if that is considered hardcoding or not
 
         
 
